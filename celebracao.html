@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Nosso Dia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffe5e5 0%, #fff0f5 100%);
+            font-family: 'Great Vibes', cursive;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .titulo {
+            font-size: 4rem;
+            color: #d4648a;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Estilos do carrossel */
+        .carrossel-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            margin: 0 auto 40px;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .carrossel {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .carrossel-botoes {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .botao-carrossel {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .botao-carrossel.ativo {
+            background: #d4648a;
+            transform: scale(1.2);
+        }
+
+        .seta {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(212, 100, 138, 0.7);
+            color: white;
+            font-size: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .seta:hover {
+            background: rgba(255, 20, 147, 0.9);
+        }
+
+        .seta-esquerda {
+            left: 15px;
+        }
+
+        .seta-direita {
+            right: 15px;
+        }
+
+        .sem-fotos {
+            color: #d4648a;
+            font-size: 1.8rem;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .voltar {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #d4648a;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 100, 138, 0.3);
+        }
+
+        .voltar:hover {
+            background: #ff1493;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 100, 138, 0.4);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @media (max-width: 768px) {
+            .titulo {
+                font-size: 2.5rem;
+            }
+            
+            .carrossel-container {
+                height: 300px;
+            }
+            
+            .seta {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="titulo">Feliz dia dos namorados! 💕</h1>
+        
+        <div class="carrossel-container">
+            <div class="carrossel" id="carrossel">
+                <!-- As imagens serão carregadas aqui via JavaScript -->
+                <div class="slide sem-fotos">
+                    Carregando fotos...
+                </div>
+            </div>
+            <div class="seta seta-esquerda" id="anterior">&lt;</div>
+            <div class="seta seta-direita" id="proximo">&gt;</div>
+            <div class="carrossel-botoes" id="botoes">
+                <!-- Os botões serão gerados via JavaScript -->
+            </div>
+        </div>
+        
+        <a href="index.html" class="voltar">Voltar</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const carrossel = document.getElementById('carrossel');
+            const botoesContainer = document.getElementById('botoes');
+            const btnAnterior = document.getElementById('anterior');
+            const btnProximo = document.getElementById('proximo');
+            
+            let slideAtual = 0;
+            let totalSlides = 0;
+            let intervaloAutomatico;
+            
+            // Função para carregar as imagens da pasta src
+            async function carregarImagens() {
+                try {
+                    const caminhoBase = 'src/';
+                    
+                    // Método alternativo sem PHP: carregar imagens diretamente
+                    // Isso funciona se você souber os nomes das imagens
+                    const extensoesImagem = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    
+                    // Lista de imagens na pasta src
+                    // Você precisa atualizar esta lista manualmente quando adicionar ou remover imagens
+                    const imagens = [];
+                    
+                    // Verificar se há arquivos de imagem na pasta src
+                    // Tenta carregar algumas imagens com nomes comuns
+                    for (let i = 1; i <= 20; i++) {
+                        for (const ext of extensoesImagem) {
+                            const img = new Image();
+                            const filename = `foto${i}.${ext}`;
+                            img.src = caminhoBase + filename;
+                            
+                            img.onload = function() {
+                                if (!imagens.includes(filename)) {
+                                    imagens.push(filename);
+                                    adicionarImagem(filename);
+                                }
+                            };
+                        }
+                    }
+                    
+                    // Verificar se encontramos alguma imagem após um tempo
+                    setTimeout(() => {
+                        if (imagens.length === 0) {
+                            carrossel.innerHTML = '<div class="slide sem-fotos">Adicione suas fotos na pasta "src" para vê-las aqui!</div>';
+                        }
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('Erro ao carregar imagens:', error);
+                    carrossel.innerHTML = '<div class="slide sem-fotos">Erro ao carregar as imagens. Por favor, tente novamente.</div>';
+                }
+            }
+            
+            // Função para adicionar uma imagem ao carrossel
+            function adicionarImagem(imagem) {
+                // Remover a mensagem de carregamento se for a primeira imagem
+                if (totalSlides === 0) {
+                    carrossel.innerHTML = '';
+                }
+                
+                const caminhoBase = 'src/';
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                
+                const img = document.createElement('img');
+                img.src = caminhoBase + imagem;
+                img.alt = 'Nossa foto especial';
+                img.loading = 'lazy';
+                
+                slide.appendChild(img);
+                carrossel.appendChild(slide);
+                
+                // Criar botão para este slide
+                const botao = document.createElement('div');
+                botao.className = 'botao-carrossel';
+                botao.addEventListener('click', () => {
+                    slideAtual = totalSlides;
+                    atualizarCarrossel();
+                    reiniciarAutomatico();
+                });
+                botoesContainer.appendChild(botao);
+                
+                totalSlides++;
+                
+                // Configurar o carrossel se esta for a primeira imagem
+                if (totalSlides === 1) {
+                    configurarCarrossel();
+                } else {
+                    // Atualizar os botões se já estiver configurado
+                    atualizarCarrossel();
+                }
+            }
+            
+            // Função para configurar o carrossel
+            function configurarCarrossel() {
+                // Se não houver slides reais, não configurar o carrossel
+                if (totalSlides === 0) {
+                    btnAnterior.style.display = 'none';
+                    btnProximo.style.display = 'none';
+                    return;
+                }
+                
+                // Mostrar o primeiro slide
+                atualizarCarrossel();
+                
+                // Iniciar rotação automática
+                iniciarAutomatico();
+                
+                // Configurar eventos dos botões
+                btnAnterior.addEventListener('click', () => {
+                    slideAtual = (slideAtual - 1 + totalSlides) % totalSlides;
+                    atualizarCarrossel();
+                    reiniciarAutomatico();
+                });
+                
+                btnProximo.addEventListener('click', () => {
+                    slideAtual = (slideAtual + 1) % totalSlides;
+                    atualizarCarrossel();
+                    reiniciarAutomatico();
+                });
+            }
+            
+            // Função para atualizar a exibição do carrossel
+            function atualizarCarrossel() {
+                if (totalSlides === 0) return;
+                
+                // Mover o carrossel para mostrar o slide atual
+                carrossel.style.transform = `translateX(-${slideAtual * 100}%)`;
+                
+                // Atualizar os botões indicadores
+                const botoes = document.querySelectorAll('.botao-carrossel');
+                botoes.forEach((botao, index) => {
+                    if (index === slideAtual) {
+                        botao.classList.add('ativo');
+                    } else {
+                        botao.classList.remove('ativo');
+                    }
+                });
+            }
+            
+            // Funções para controle da rotação automática
+            function iniciarAutomatico() {
+                if (totalSlides <= 1) return;
+                
+                intervaloAutomatico = setInterval(() => {
+                    slideAtual = (slideAtual + 1) % totalSlides;
+                    atualizarCarrossel();
+                }, 5000); // Mudar slide a cada 5 segundos
+            }
+            
+            function reiniciarAutomatico() {
+                clearInterval(intervaloAutomatico);
+                iniciarAutomatico();
+            }
+            
+            // Carregar as imagens quando a página carregar
+            carregarImagens();
+        });
+    </script>
+</body>
+</html> 
